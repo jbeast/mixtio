@@ -11,7 +11,6 @@ describe Api::V1::ConsumablesController, type: :request do
       consumable_response = JSON.parse(response.body, symbolize_names: true)
 
       expect(consumable_response[:id]).to eql(consumable.id)
-      expect(consumable_response[:name]).to eql(consumable.name)
       expect(consumable_response[:depleted]).to eql(consumable.depleted)
 
       batch = consumable_response[:batch]
