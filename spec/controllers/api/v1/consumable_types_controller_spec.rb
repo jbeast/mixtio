@@ -4,7 +4,7 @@ describe Api::V1::ConsumableTypesController, type: :request do
 
   describe "GET #show" do
 
-    it "should return a serialized consumable by barcode" do
+    it "should return a serialized Consumable Type by id" do
       consumable_type = create(:consumable_type_with_ingredients)
 
       get api_v1_consumable_type_path(consumable_type)
@@ -26,6 +26,27 @@ describe Api::V1::ConsumableTypesController, type: :request do
         json = JSON.parse(response.body, symbolize_names: true)
 
         expect(json[:message]).to eq('Couldn\'t find ConsumableType with \'id\'=123')
+      end
+    end
+
+  end
+
+  describe 'GET #index' do
+
+    it "should return a serialized list of consumable types" do
+      consumable_types = create_list(:consumable_type, 3)
+
+      get api_v1_consumable_types_path
+      expect(response).to be_success
+
+      json = JSON.parse(response.body, symbolize_names: true)
+
+      expect(json[:consumable_types]).to be_kind_of(Array)
+
+      json[:consumable_types].each_with_index do |consumable_type, index|
+        expect(consumable_type[:id]).to eq(consumable_types[index].id)
+        expect(consumable_type[:name]).to eq(consumable_types[index].name)
+        expect(consumable_type[:uri]).to include(api_v1_consumable_type_path(consumable_types[index]))
       end
     end
 

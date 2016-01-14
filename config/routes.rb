@@ -27,7 +27,7 @@ Rails.application.routes.draw do
     namespace :v1 do
       get 'docs', to: 'docs#index', defaults: { format: :html }
       resources :consumables, param: :barcode, only: [:show]
-      resources :consumable_types, only: [:show]
+      resources :consumable_types, only: [:show, :index]
       resources :batches, only: [:show]
       resources :lots, only: [:show]
       resources :suppliers, only: [:show]
