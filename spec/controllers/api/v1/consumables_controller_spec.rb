@@ -29,5 +29,15 @@ describe Api::V1::ConsumablesController, type: :request do
       expect(consumable_type[:uri]).to include(api_v1_consumable_type_path consumable.batch.lot.consumable_type)
     end
 
+    context "consumable does not exist" do
+      it "should return a 404 with an error message" do
+        get api_v1_consumable_path(:barcode => 123)
+        expect(response.status).to be(404)
+        consumable_response = JSON.parse(response.body, symbolize_names: true)
+
+        expect(consumable_response[:message]).to eq('Couldn\'t find Consumable')
+      end
+    end
+
   end
 end
