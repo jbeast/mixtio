@@ -1,35 +1,52 @@
 require "rails_helper"
 
-RSpec.describe ApiPagination, type: :controller do
+RSpec.describe ApplicationController, type: :controller do
 
-  let!(:collection) do
-    collection = double()
-    collection.stub(:current_page) { 1 }
-    collection.stub(:total_pages) { 5 }
-    collection.stub(:first_page?) { true }
-    collection.stub(:last_page?) { false }
-    collection
-  end
-
-  controller(ApplicationController) do
+  controller do
     include ApiPagination
 
     def index
-      with_pagination(collection) do |c|
-        # nothing
+      with_pagination(Batch.page(params[:page])) do |b|
+        render nothing: true
       end
     end
   end
 
-  before do
-    routes.draw {
-      get 'index' => 'anonymous#index'
-    }
-  end
+  let!(:page_size) { Batch.default_per_page }
 
-  it "adds a Link field to the header" do
-    get :index
-    expect(1).to be(1)
-  end
+  subject { response.headers["Link"].split(", ") }
 
+  context "when there are multiple pages" do
+
+    before { create_list(:batch, page_size * 3) }
+
+    context "navigate to first page" do
+
+      before { get :index, page: 1 }
+
+      it "adds a link for the next page" do
+        expect(subject).to include("<http://test.host/anonymous?page=2>; rel=\"next\"")
+      end
+
+      it "adds a link for the last page" do
+        expect(subject).to include("<http://test.host/anonymous?page=3>; rel=\"last\"")
+      end
+
+    end
+
+    context "navigate to last page" do
+
+      before { get :index, page: 3 }
+
+      it 'adds a link for the previous page' do
+        expect(subject).to include("<http://test.host/anonymous?page=2>; rel=\"prev\"")
+      end
+
+      it 'adds a link for the first page' do
+        expect(subject).to include("<http://test.host/anonymous?page=1>; rel=\"first\"")
+      end
+
+    end
+
+  end
 end
